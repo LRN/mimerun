@@ -32,6 +32,7 @@ to be handled correctly.
   * win32api MinGW package
   * libmagic (from file(1) package)
   * libgnurx
+  * libtre
   * GNU make
 
  MSys (or a cross-compiling toolchain on *nix) is necessary to build libmagic

@@ -1,0 +1,94 @@
+Mimerun documentation
+
+=========== REGISTRY ===========
+
+ Mimerun creates/changes the following registry keys/values:
+
+ On installation:
+HKCR/Unknown/shell/(Default) is copied into HKCR/Unknown/shell/Mimerun_backup_default
+HKCR/Unknown/shell/(Default) is set to 'mimerun'
+HKCR/Unknown/shell/mimerun/command is created
+HKCR/Unknown/shell/mimerun/command/(Default) is set to '$(DESTDIR)\$(ARCHITECTURE)\cmdrun.exe SW_SHOWNORMAL system_fallback "%1"'
+
+HKCR/CLSID/{48B8EC64-6C00-4A39-988E-95E01BCDC7B9}/InProcServer32 is created
+HKCR/CLSID/{48B8EC64-6C00-4A39-988E-95E01BCDC7B9}/InProcServer32/(Default) is set to '$(DESTDIR)\$(ARCHITECTURE)\libmimerunshook-$(VERSION_MAJOR).dll'
+HKCR/CLSID/{48B8EC64-6C00-4A39-988E-95E01BCDC7B9}/InProcServer32/ThreadingModel is set to 'Apartment'
+
+(64-bit OS only) HKCR/CLSID/Wow6432Node/{48B8EC64-6C00-4A39-988E-95E01BCDC7B9}/InProcServer32 is created
+(64-bit OS only) HKCR/CLSID/Wow6432Node/{48B8EC64-6C00-4A39-988E-95E01BCDC7B9}/InProcServer32/(Default) is set to '$(DESTDIR)\x86\libmimerunshook-$(VERSION_MAJOR).dll'
+(64-bit OS only) HKCR/CLSID/Wow6432Node/{48B8EC64-6C00-4A39-988E-95E01BCDC7B9}/InProcServer32/ThreadingModel is set to 'Apartment'
+
+HKLM/SOFTWARE/Microsoft/Windows/CurrentVersion/Explorer/ShellExecuteHooks/{48B8EC64-6C00-4A39-988E-95E01BCDC7B9} is set to 'Mimerun $(ARCHITECTURE)'
+(64-bit OS only) HKLM/SOFTWARE/Wow6432Node/Microsoft/Windows/CurrentVersion/Explorer/ShellExecuteHooks/{48B8EC64-6C00-4A39-988E-95E01BCDC7B9} is set to 'Mimerun x86'
+
+HKLM/SOFTWARE/Microsoft/Windows/CurrentVersion/Policies/Explorer/EnableShellExecuteHooks is set to 1
+(64-bit OS only) HKLM/SOFTWARE/Wow6432Node/Microsoft/Windows/CurrentVersion/Policies/Explorer/EnableShellExecuteHooks is set to 1
+
+(64-bit OS only) HKLM (or HKCU)/Software/Wow6432Node/Software/mimerun/rules is created
+(64-bit OS only) HKLM (or HKCU)/Software/Wow6432Node/Software/mimerun/rules/0000_Check_for_shebang_first is created
+(64-bit OS only) HKLM (or HKCU)/Software/Wow6432Node/Software/mimerun/rules/0000_Check_for_shebang_first/(Default) is set to '.*'
+(64-bit OS only) HKLM (or HKCU)/Software/Wow6432Node/Software/mimerun/rules/0000_Check_for_shebang_first/shebang is set to 3
+(64-bit OS only) HKLM (or HKCU)/Software/Wow6432Node/Software/mimerun/rules/9999_Example_rule_-_runs_Notepad_on_any_plain_text_file is created
+(64-bit OS only) HKLM (or HKCU)/Software/Wow6432Node/Software/mimerun/rules/9999_Example_rule_-_runs_Notepad_on_any_plain_text_file/(Default) is set to 'name=.*; mime-type=text/plain;.*'
+(64-bit OS only) HKLM (or HKCU)/Software/Wow6432Node/Software/mimerun/rules/9999_Example_rule_-_runs_Notepad_on_any_plain_text_file/handler is set to '%SystemRoot%\system32\NOTEPAD.EXE %0'
+(32-bit OS only) HKLM (or HKCU)/Software/Software/mimerun/rules is created
+(32-bit OS only) HKLM (or HKCU)/Software/Software/mimerun/rules/0000_Check_for_shebang_first is created
+(32-bit OS only) HKLM (or HKCU)/Software/Software/mimerun/rules/0000_Check_for_shebang_first/(Default) is set to '.*'
+(32-bit OS only) HKLM (or HKCU)/Software/Software/mimerun/rules/0000_Check_for_shebang_first/shebang is set to 3
+(32-bit OS only) HKLM (or HKCU)/Software/Software/mimerun/rules/9999_Example_rule_-_runs_Notepad_on_any_plain_text_file is created
+(32-bit OS only) HKLM (or HKCU)/Software/Software/mimerun/rules/9999_Example_rule_-_runs_Notepad_on_any_plain_text_file/(Default) is set to 'name=.*; mime-type=text/plain;.*'
+(32-bit OS only) HKLM (or HKCU)/Software/Software/mimerun/rules/9999_Example_rule_-_runs_Notepad_on_any_plain_text_file/handler is set to '%SystemRoot%\system32\NOTEPAD.EXE %0'
+
+=========== RULES ===========
+
+ Rules are recorded in HKLM (or HKCU)/Software/Wow6432Node/Software/mimerun/rules (on 64-bit OSes) or HKLM (or HKCU)/Software/Software/mimerun/rules (on 32-bit OSes)
+ Each subkey of that key is a name of a rule.
+ Rules are processed in alphabetical order, which is why it is advised (but not enforced) to prefix a rule name with a number to make sure that rules are processed in a particular order.
+ Each subkey that denotes a rule might contain the following values:
+  REG_SZ    (Default) - mandatory. Contains a regular expression (compatible with libtre) that is matched against the result of file type checking by libmagic. When a match is found, other values of the rule are considered.
+  REG_SZ    handler   - optional. If it is set, this is the command line that Mimerun will execute. Environment variables in this command line will be extended before executing.
+  REG_DWORD shebang   - optional. A set of flags that control shebang detection.
+
+ REG_DWORD shebang is a combination of the following flags:
+  0x01 MIMERUN_SHEBANG_LOOKFORIT  - If set: enables shebang detection. If unset: disables shebang detection.
+  0x02 MIMERUN_SHEBANG_TRYITFIRST - If set: Mimerun will try to use a shebang (if found) before considering the handler (if any). If shebang fails or is not found, the handler (if any) will be used. If unset: Mimerun will try to use shebang after the handler have failed, or if the handler is not available.
+  0x04 MIMERUN_SHEBANG_FAILONIT   - If set: Mimerun will fail immediately after a shebang (if found) fails to run. If unset: Mimerun will not fail immediately after a shebang (if found) fails to run. If MIMERUN_SHEBANG_TRYITFIRST is set, the handler will be considere after a shebang fails.
+ Default value is 0 (shebangs are disabled).
+ Mimerun will return immediately after a shebang or a handler have succeeded, and will not check for the remaining handler (if shebang succeeded and MIMERUN_SHEBANG_TRYITFIRST was set) or shebang (if handler succeeded and MIMERUN_SHEBANG_TRYITFIRST was not set).
+
+ Mimerun will check the rules until a rule check succeedes (a CreateProcess() call succeedes) or until there is no more rules.
+ Rules in HKCU are checked before rules in HKLM.
+
+ The string that is matched against rule's regular expression is:
+  "name={name}; mime-type={type}; mime-encoding={enc}; apple={apple}; commandline={file}{space}{parameters};"
+  where:
+   {name} is replaced by a lenghty type description
+   {type} is replaced by a mime type
+   {enc} is replaced by an encoding
+   {apple} is replaced by Apple CREATOR/TYPE
+   {file} is replaced by filename (the way it was specified in the shell call)
+   {space} is replaced by a space character if {parameters} is defined, an empty string otherwise
+   {parameters} is replaced by command line parameters of the shell call
+  Undefined variables are replaced by empty strings, so the string might look like:
+   "name=; mime-type=; mime-encoding=us-ascii; apple=data; commandline=foo;"
+
+=========== DEBUG ===========
+
+ Mimerun will check for
+  REG_SZ HKLM (or HKCU)/Software/(Wow6432Node/ on 64-bit OSes)Software/mimerun/debug
+ existence, and if it exists, will use its contents as a file name to write debug output into.
+ Debug logging is inefficient, as Mimerun will open the file, write a single line, then close it, but that helps avoid locking the log file in case of emergency.
+
+=========== CMDRUN ===========
+
+ cmdrun accepts three command line arguments:
+ int   nShow    - same as the nShow in ShowWindow() call
+ char *fallback - either 'system_fallback' or 'mimerun_fallback'.
+  The former will cause cmdrun to use HKCR/Unknown/opendlg/command/(Default) to handle file that did not match anything.
+  The latter will cause cmdrun to start up Mimerun rule editor (not implemented yet, so this option does nothing at the moment)
+  Any other value will cause cmdrun to display a dialogue asking the user which of the ways of handling unknown types of file should be used
+
+=========== PIPING AND CONSOLES ===========
+
+ When a process that calls ShellExecute() or ShellExecuteEx() possesses a console, any handler Mimerun spawns inherits that console (if the handler is a console application). Mimerun will not respect the caller's request to allocate new console for the handler, because Windows Commandline shell will do that for any unknown files, making it impossible to maintain consistent behaviour for known executables (handled by the shell) and unknown executables (handled by Mimerun).
+ Mimerun supports standard stream redirection. That is, however, incompatible with creating a new console for handler processes when the caller does not have a console. Either all three streams are redirected (handles inherited from the parent process), or all three streams are tied to a new console. That is the way CreateProcess() handles console creating and stream redirection.

@@ -1,0 +1,2 @@
+#!/bin/sh
+BUILD=x86_64-w64-mingw32 DEBUG=1 ABI=64 make

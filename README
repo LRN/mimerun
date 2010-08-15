@@ -1,0 +1,60 @@
+Mimerun consists of the following:
+ * MimeRun Shell Hook (libmimerunshook)
+ * Commandline bridge to the hook (cmdrun)
+ * Installer/uninstaller (mimerunreg)
+
+ Mimerun installs itself as a shell hook (shell hooks are supported in all
+versions of Windows since Windows XP, although they are disabled in Vista
+and later by default). Whenever something (Windows Explorer, Windows command
+line shell, or any Windows program) calls ShellExecute() or ShellExecuteEx(),
+Mimerun catches that and, if target is a file, uses libmagic (the supporting
+library if the UNIX file(1) utility) to guess the type of target. Then it
+compares the result of type guessing with a set of Mimerun rules (written by
+user, stored in the registry) and, if a match is found, executes the command
+specified in the matching rule. Once a matching rule is found and its handler
+is executed successfully, Mimerun signals the caller of that success, stopping
+the shell from trying to handle the target. If no rules match, or the target
+is not a file, or if there were errors during the computation, Mimerun signals
+a failure and lets the shell find other ways to handle the target.
+ Mimerun also supports shebangs, being able to use them exclusively to run
+scripts with correct interpreters, or supplementing a handler with them.
+ Commandline bridge is used to force the shell to pass any unknown files (files
+that do not match any of the shell's own file associations) to Mimerun. This
+allows Mimerun to process files that were double-clicked in Windows Explorer
+and were not handled by the shell.
+ Adding "." to PATHEXT environment variable allows files without extensions
+to be handled correctly.
+
+=========== BUILDING ===========
+
+ Build requirements:
+  * MinGW or MinGW-W64 toolchain
+  * win32api MinGW package
+  * libmagic (from file(1) package)
+  * libgnurx
+  * GNU make
+
+ MSys (or a cross-compiling toolchain on *nix) is necessary to build libmagic
+(and build libgnurx for x64, since MinGW provides binaries only for x86), but
+Mimerun itself can be built without MSys.
+
+ Makefile is located in ./build subdirectory.
+ Two scripts - compile_x86 and compile_x64 are provided as examples of how to
+invoke the makefile.
+
+=========== INSTALLING ===========
+
+ The same makefile is used to install mimerun into target directory. Invoke its
+install target. For example:
+    make install DESTDIR=c:\mimerun
+DESTDIR definition is mandatory for install target.
+
+ After that run, for example:
+    c:\mimerun\<architecture>\mimrunreg.exe --register local_machine
+to put the necessary keys into the registry. Architecture can be
+x86 (for 32-bit OS) or x64 (for 64-bit OS).
+
+ mimerunreg will not modify PATHEXT.
+ mimerunreg will register libmimerunshook COM library, enable shell hooks,
+add cmdrun handler for Unknown, and create two example rules in
+Software/mimerun/rules

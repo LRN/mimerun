@@ -263,14 +263,15 @@ HRESULT STDMETHODCALLTYPE MimeRunSHook_ExecuteW (IMimeRunSHook *this, LPSHELLEXE
       logtofilew (logfile, L"  cbSize (%d)\n", einfo->cbSize);
       logtofilew (logfile, L"  fMask (%08X)\n", einfo->fMask);
       logtofilew (logfile, L"  hwnd (%08X)\n", einfo->hwnd);
-      logtofilew (logfile, L"  lpVerb (%s)\n", einfo->lpVerb);
-      logtofilew (logfile, L"  lpFile (%s)\n", einfo->lpFile);
-      logtofilew (logfile, L"  lpParameters (%s)\n", einfo->lpParameters);
-      logtofilew (logfile, L"  lpDirectory (%s)\n", einfo->lpDirectory);
+      logtofilew (logfile, L"  lpVerb (%s)\n", einfo->lpVerb != NULL ? einfo->lpVerb : L"NULL");
+      logtofilew (logfile, L"  lpFile (%s)\n", einfo->lpFile != NULL ? einfo->lpFile : L"NULL");
+      logtofilew (logfile, L"  lpParameters (%s)\n", einfo->lpParameters != NULL ? einfo->lpParameters : L"NULL");
+      logtofilew (logfile, L"  lpDirectory (%s)\n", einfo->lpDirectory != NULL ? einfo->lpDirectory : L"NULL");
       logtofilew (logfile, L"  nShow (%d)\n", einfo->nShow);
       logtofilew (logfile, L"  hInstApp (%d)\n", einfo->hInstApp);
       logtofilew (logfile, L"  lpIDList (%08X)\n", einfo->lpIDList);
-      logtofilew (logfile, L"  lpClass (%s)\n", einfo->lpClass);
+      logtofilew (logfile, L"  lpClass (x08X: %s)\n", einfo->lpClass,
+          ~einfo->fMask & SEE_MASK_CLASSNAM ? L"IGNORED" : einfo->lpClass != NULL ? einof->lpClass : L"NULL");
       logtofilew (logfile, L"  hkeyClass (%08X)\n", einfo->hkeyClass);
       logtofilew (logfile, L"  dwHotKey (%08X)\n", einfo->dwHotKey);
       logtofilew (logfile, L"\n");

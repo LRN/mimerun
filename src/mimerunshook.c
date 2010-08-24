@@ -271,7 +271,7 @@ HRESULT STDMETHODCALLTYPE MimeRunSHook_ExecuteW (IMimeRunSHook *this, LPSHELLEXE
       logtofilew (logfile, L"  hInstApp (%d)\n", einfo->hInstApp);
       logtofilew (logfile, L"  lpIDList (%08X)\n", einfo->lpIDList);
       logtofilew (logfile, L"  lpClass (x08X: %s)\n", einfo->lpClass,
-          ~einfo->fMask & SEE_MASK_CLASSNAM ? L"IGNORED" : einfo->lpClass != NULL ? einof->lpClass : L"NULL");
+          ~einfo->fMask & SEE_MASK_CLASSNAME ? L"IGNORED" : einfo->lpClass != NULL ? einfo->lpClass : L"NULL");
       logtofilew (logfile, L"  hkeyClass (%08X)\n", einfo->hkeyClass);
       logtofilew (logfile, L"  dwHotKey (%08X)\n", einfo->dwHotKey);
       logtofilew (logfile, L"\n");
